@@ -8,6 +8,8 @@ import androidx.core.content.ContextCompat;
 import android.Manifest;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
 import android.widget.Button;
@@ -18,11 +20,13 @@ import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
@@ -93,7 +97,18 @@ public class MainActivity extends AppCompatActivity {
                             if (location != null) {
                                 CurrentLatittude = location.getLatitude();
                                 CurrentLongitude = location.getLongitude();
-                                user_location.setText("User's Current Location" + "\nLatitude = " + CurrentLatittude + "\nLongitude = " + CurrentLongitude);
+                                Geocoder geocoder = new Geocoder(MainActivity.this, Locale.getDefault());
+                                List<Address> addresses = null;
+                                try {
+                                    addresses = geocoder.getFromLocation(CurrentLatittude, CurrentLongitude, 1);
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                                String place=addresses.get(0).getSubLocality();
+                                String cityName = addresses.get(0).getAddressLine(0);
+                                String stateName = addresses.get(0).getAddressLine(1);
+                                String countryName = addresses.get(0).getCountryName();
+                                user_location.setText("User's Current Location \n" +"\n"+cityName+", "+countryName+ "\nLatitude = " + CurrentLatittude + "\nLongitude = " + CurrentLongitude);
                                 for (int j = 0; j < locations.size(); j++) {
                                     lat1 = locations.get(j).getLatitude();
                                     lon1 = locations.get(j).getLongitude();
@@ -116,9 +131,9 @@ public class MainActivity extends AppCompatActivity {
 
         List<Double> x = new ArrayList<Double>();
         x.add(dist);
-
-       Collections.reverse(x);
-        textView.setText(textView.getText().toString() + "\nTo " + name + " = " + x);
+        String dist1=dist+"";
+        dist1=dist1.substring(0,dist1.length()-(dist1.length()-4));
+        textView.setText(textView.getText().toString() + "\nDistance To " + name + " = " + dist1+" Km");
 
 
 
